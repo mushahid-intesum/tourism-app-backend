@@ -33,35 +33,35 @@ def customerSignin(request):
             })
 
     except Exception as e:
-        print("ERROR IN loginAsAdmin() method in admin/views.py")
+        print("ERROR IN loginAsCustomer() method in customer/views.py")
         print(e)
         return util.sendDatabaseConnectionErrorResponse()
 
 @csrf_exempt
 def customerSignup(request):
+
     try:
         requestBody = util.decodeJson(request.body)
-        email = requestBody['email']
-        password = requestBody['password']
+        email = requestBody['userEmail']
+        password = requestBody['passWord']
         firstName = requestBody['firstName']
-        secondName = requestBody['secondName']
+        secondName = requestBody['lastName']
 
         userId = util.generateID("CUSTOMER")
 
-
         util.executesql(
             query = "INSERT INTO customer_user_table" \
-                "(userId, userEmail, password, firstName, secondName, createdTime)" \
+                "(userId, userEmail, userPassword, firstName, secondName, createdTime)" \
                 "VALUES (%s, %s, %s, %s, %s, %s)",
             datatuple=[userId, email, make_password(password), firstName, secondName, util.utcTimeStamp()] 
         )
 
-        adminDetailsUserDatabaseResult = util.executesql(
-            query="SELECT * FROM admin_user_table WHERE userEmail = %s AND password = %s",
+        customerDetailsUserDatabaseResult = util.executesql(
+            query="SELECT * FROM customer_user_table WHERE userEmail = %s AND userPassword = %s",
             datatuple=[email, password])
 
-        if (adminDetailsUserDatabaseResult):
-            return sendCustomerData(adminDetailsUserDatabaseResult)
+        if (customerDetailsUserDatabaseResult):
+            return sendCustomerData(customerDetailsUserDatabaseResult)
         else:
             return JsonResponse({
                 'status': False,
@@ -69,7 +69,7 @@ def customerSignup(request):
             })
 
     except Exception as e:
-        print("ERROR IN loginAsAdmin() method in admin/views.py")
+        print("ERROR IN SignupAsCustomer() method in customer/views.py")
         print(e)
         return util.sendDatabaseConnectionErrorResponse()
 

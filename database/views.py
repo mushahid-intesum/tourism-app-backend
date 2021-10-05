@@ -9,21 +9,54 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 
+def setHotelRecommends(request):
+    try:
+        hotelIds = util.executesql(
+            query="SELECT hotelId FROM hotels_table",
+            datatuple=[])
+
+        for hotelId in hotelIds:
+            total_neg_reviews = util.executesql(query="SELECT SUM(sentiment) FROM reviews_table WHERE hotelId = %s",
+                                            datatuple=[hotelId[0]])[0][0]
+
+            all_reviews = util.executesql(query="SELECT COUNT(reviewId) FROM reviews_table WHERE hotelId = %s",
+                                            datatuple=[hotelId[0]])[0][0]
+
+
+            percentage = total_neg_reviews / all_reviews
+
+            recommend = 1
+
+            if percentage > 0.6:
+                print("negative")
+                recommend = 0
+
+            util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",
+                                            datatuple=[recommend, hotelId[0]])
+            
+        return JsonResponse({
+                'status': True,
+                'responseMessage': ServerEnum.RESPONSE_SUCCESS
+            })
+
+    except Exception as e:
+        print("ERROR IN setHotelRecommends() method in database/views.py")
+        print(e)
+        return util.sendDatabaseConnectionErrorResponse()
+
 def database_commit(request):
     # return JsonResponse({
     #     'status': True,
     #     'responseMessage': "NO DATABASE COMMIT AVAILABLE"
     # })
-    # drop_table(tableList=getAllTableName(),
-    #            exceptionList=[
-                #    'customer_/
-    #            ])
+    # tableList = ['admin_user_table', 'customer_user_table', 'reviews_table', 'hotels_table']
+    # drop_table(tableList)
 
     # create_customer_table()
     # create_admin_table()
     # add_dummy_admin()
     # create_hotels_table()
-    create_reviews_table()
+    # create_reviews_table()
     return JsonResponse({
         'status': True,
         'responseMessage': "DATABASE COMMIT SUCCESS"
@@ -120,7 +153,7 @@ def create_hotels_table():
         sqlQuery = "CREATE TABLE IF NOT EXISTS hotels_table (" \
                    "hotelId VARCHAR(250) NOT NULL," \
                    "hotelName VARCHAR(250)," \
-                   "hotelAddress VARCHAR(250)," \
+                   "isRecommended INT, " \
                    "hotelDetails MEDIUMBLOB," \
                    "PRIMARY KEY (hotelId)) " 
 
@@ -171,6 +204,8 @@ def getAllTableName():
         result = util.executesql(query="SHOW TABLES", datatuple=[])
         table_list = []
 
+        print(result)
+
         for i in range(0, len(result)):
             table_list.append(result[i][0])
 
@@ -185,11 +220,11 @@ def getAllTableName():
         })
 
     
-def drop_table(tableList, exceptionList):
+def drop_table(tableList):
     try:
         for tableName in tableList:
-            if tableName not in exceptionList:
-                util.executesql(query="DROP TABLE " + tableName, datatuple=[])
+            print(tableName)
+            util.executesql(query="DROP TABLE " + tableName, datatuple=[])
 
         return JsonResponse({
             'status': True,
