@@ -21,8 +21,8 @@ def customerSignin(request):
         password = requestBody['password']
 
         adminDetailsUserDatabaseResult = util.executesql(
-            query="SELECT * FROM customer_user_table WHERE userEmail = %s AND password = %s",
-            datatuple=[email, password])
+            query="SELECT * FROM customer_user_table WHERE userEmail = %s",
+            datatuple=[email])
 
         if (adminDetailsUserDatabaseResult):
             return sendCustomerData(adminDetailsUserDatabaseResult)
@@ -39,8 +39,10 @@ def customerSignin(request):
 
 @csrf_exempt
 def customerSignup(request):
+ 
 
     try:
+        print(request.body)
         requestBody = util.decodeJson(request.body)
         email = requestBody['userEmail']
         password = requestBody['passWord']
@@ -57,9 +59,9 @@ def customerSignup(request):
         )
 
         customerDetailsUserDatabaseResult = util.executesql(
-            query="SELECT * FROM customer_user_table WHERE userEmail = %s AND userPassword = %s",
-            datatuple=[email, password])
-
+            query="SELECT * FROM customer_user_table WHERE userEmail = %s",
+            datatuple=[email])
+   
         if (customerDetailsUserDatabaseResult):
             return sendCustomerData(customerDetailsUserDatabaseResult)
         else:
