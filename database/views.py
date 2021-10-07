@@ -1,6 +1,7 @@
 import json
 import time
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
 from general import util
 from models.constants import ServerEnum
 import pyrebase
@@ -9,40 +10,6 @@ from django.core.cache import cache
 from django.http import JsonResponse
 
 
-def setHotelRecommends(request):
-    try:
-        hotelIds = util.executesql(
-            query="SELECT hotelId FROM hotels_table",
-            datatuple=[])
-
-        for hotelId in hotelIds:
-            total_neg_reviews = util.executesql(query="SELECT SUM(sentiment) FROM reviews_table WHERE hotelId = %s",
-                                            datatuple=[hotelId[0]])[0][0]
-
-            all_reviews = util.executesql(query="SELECT COUNT(reviewId) FROM reviews_table WHERE hotelId = %s",
-                                            datatuple=[hotelId[0]])[0][0]
-
-
-            percentage = total_neg_reviews / all_reviews
-
-            recommend = 1
-
-            if percentage > 0.6:
-                print("negative")
-                recommend = 0
-
-            util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",
-                                            datatuple=[recommend, hotelId[0]])
-            
-        return JsonResponse({
-                'status': True,
-                'responseMessage': ServerEnum.RESPONSE_SUCCESS
-            })
-
-    except Exception as e:
-        print("ERROR IN setHotelRecommends() method in database/views.py")
-        print(e)
-        return util.sendDatabaseConnectionErrorResponse()
 
 def database_commit(request):
     # return JsonResponse({
