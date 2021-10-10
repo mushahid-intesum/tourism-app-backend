@@ -26,16 +26,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 @csrf_exempt
 def getHotelDashboard(request):
     try:
-        requestBody = util.decodeJson(request.body)
+        
 
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
             datatuple=[])
 
+        print(hotelDatabaseResult[0])
         return JsonResponse({
-            'hotelData': hotelDatabaseResult,
+            'hotelData': hotelDatabaseResult[0],
             'status': True,
-            'responseMessage': ServerEnum.ServerEnum.RESPONSE_SUCCESS
+            'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
 
     except Exception as e:
