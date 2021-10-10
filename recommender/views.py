@@ -26,11 +26,20 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 @csrf_exempt
 def getHotelDashboard(request):
     try:
+<<<<<<< HEAD
+        
+=======
+>>>>>>> a87368ef1d04be705a9fe13a73f20b8c3c260c88
 
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
             datatuple=[])
 
+<<<<<<< HEAD
+        print(hotelDatabaseResult[0])
+        return JsonResponse({
+            'hotelData': hotelDatabaseResult[0],
+=======
         hotels = []
 
         for hotel in hotelDatabaseResult:
@@ -49,6 +58,7 @@ def getHotelDashboard(request):
 
         return JsonResponse({
             'hotelData': hotels,
+>>>>>>> a87368ef1d04be705a9fe13a73f20b8c3c260c88
             'status': True,
             'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
