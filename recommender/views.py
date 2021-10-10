@@ -25,7 +25,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 @csrf_exempt
 def getHotelDashboard(request):
-    print(request)
     try:
 
         hotelDatabaseResult = util.executesql(
