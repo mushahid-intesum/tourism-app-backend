@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^hotel_search_country/', recommender_views.getHotelOnCountry, name='hotel_search_country'),
     url(r'^hotel_search_name/', recommender_views.getHotelOnName, name='hotel_search_name'),
     url(r'^get_specific_hotel_reviews/', recommender_views.getHotelReviews, name='get_specific_hotel_reviews'),
-    url(r'^set_hotel_recommendations/', database_views.setHotelRecommends, name='set_hotel_recommendations'),
+    url(r'^set_hotel_recommendations/', recommender_views.setHotelRecommends, name='set_hotel_recommendations'),
 
 
     #Other

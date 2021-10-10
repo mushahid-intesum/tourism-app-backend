@@ -25,16 +25,41 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 @csrf_exempt
 def getHotelDashboard(request):
+    print(request)
     try:
+<<<<<<< HEAD
         
+=======
+>>>>>>> a87368ef1d04be705a9fe13a73f20b8c3c260c88
 
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
             datatuple=[])
 
+<<<<<<< HEAD
         print(hotelDatabaseResult[0])
         return JsonResponse({
             'hotelData': hotelDatabaseResult[0],
+=======
+        hotels = []
+
+        for hotel in hotelDatabaseResult:
+            print(hotel[3])
+            hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
+            print(hotelDetails)
+            data = {"id": hotel[0], "name": hotel[1], "isRecommended": hotel[2], 
+                        'hotelAddress': hotelDetails['hotelAddress'], 
+                        'description': hotelDetails['description'],
+                        'amenities': hotelDetails['amenities']}
+            hotels.append(data)
+
+            # print(data)
+
+        print(hotels)
+
+        return JsonResponse({
+            'hotelData': hotels,
+>>>>>>> a87368ef1d04be705a9fe13a73f20b8c3c260c88
             'status': True,
             'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
@@ -238,3 +263,39 @@ def get_wordnet_pos(pos_tag):
 
 
 # ------------------------------------------------------------------------------------- #
+
+@csrf_exempt
+def setHotelRecommends(request):
+    try:
+        hotelIds = util.executesql(
+            query="SELECT hotelId FROM hotels_table",
+            datatuple=[])
+
+        for hotelId in hotelIds:
+            total_neg_reviews = util.executesql(query="SELECT SUM(sentiment) FROM reviews_table WHERE hotelId = %s",
+                                            datatuple=[hotelId[0]])[0][0]
+
+            all_reviews = util.executesql(query="SELECT COUNT(reviewId) FROM reviews_table WHERE hotelId = %s",
+                                            datatuple=[hotelId[0]])[0][0]
+
+
+            percentage = total_neg_reviews / all_reviews
+
+            recommend = 1
+
+            if percentage > 0.6:
+                print("negative")
+                recommend = 0
+
+            util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",
+                                            datatuple=[recommend, hotelId[0]])
+            
+        return JsonResponse({
+                'status': True,
+                'responseMessage': ServerEnum.RESPONSE_SUCCESS
+            })
+
+    except Exception as e:
+        print("ERROR IN setHotelRecommends() method in database/views.py")
+        print(e)
+        return util.sendDatabaseConnectionErrorResponse()
