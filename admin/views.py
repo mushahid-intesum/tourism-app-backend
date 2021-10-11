@@ -51,6 +51,7 @@ def adminAddHotel(request):
     print(request.headers)
     try:
         requestBody = util.decodeJson(request.body)
+        print(requestBody)
 
         hotelName = requestBody['hotelName']
         hotelDetails = requestBody['hotelDetails']

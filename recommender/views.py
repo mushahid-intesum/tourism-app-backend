@@ -26,7 +26,10 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 @csrf_exempt
 def getHotelDashboard(request):
     try:
-       
+        requestBody = util.decodeJson(request.body)
+
+        page = requestBody['page']
+
 
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
@@ -34,10 +37,11 @@ def getHotelDashboard(request):
             
         hotels = []
         iter = 5
+        iter += page
 
         for hotel in hotelDatabaseResult:
-            # if iter == 0:
-            #     break
+            if iter == 0:
+                break
             # print(hotel[3])
             hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
             data = {"id": hotel[0], "name": hotel[1], "isRecommended": hotel[2], 
