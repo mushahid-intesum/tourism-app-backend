@@ -32,15 +32,13 @@ def getHotelDashboard(request):
             datatuple=[])
 
         hotels = []
-
         iter = 5
 
         for hotel in hotelDatabaseResult:
-            if iter == 0:
-                break
-            print(hotel[3])
+            # if iter == 0:
+            #     break
+            # print(hotel[3])
             hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
-            print(hotelDetails)
             data = {"id": hotel[0], "name": hotel[1], "isRecommended": hotel[2], 
                         'hotelAddress': hotelDetails['hotelAddress'], 
                         'description': hotelDetails['description'],

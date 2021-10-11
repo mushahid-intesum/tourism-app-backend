@@ -15,6 +15,8 @@ urlpatterns = [
 
     # ADMIN
     url(r'^admin_sign_in/', admin_views.adminSignin, name="admin_sign_in"),
+    url(r'^admin_add_hotel/', admin_views.adminAddHotel, name="admin_add_hotel"),
+    url(r'^admin_get_hotel_list/', admin_views.adminGetHotelList, name="admin_get_hotel_list"),
 
     # Database
     url(r'^database_commit/', database_views.database_commit, name="database_commit"),
