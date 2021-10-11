@@ -26,32 +26,38 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 @csrf_exempt
 def getHotelDashboard(request):
     try:
+       
 
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
             datatuple=[])
 
-        hotels = []
 
-        iter = 5
+        
+
+        hotels = []
+        requestBody = util.decodeJson(request.body)
+
+        iter = requestBody['page']+20
 
         for hotel in hotelDatabaseResult:
             if iter == 0:
                 break
-            print(hotel[3])
+        
+            hotelDetails = None
             hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
-            print(hotelDetails)
+            # print(hotelDetails)
             data = {"id": hotel[0], "name": hotel[1], "isRecommended": hotel[2], 
                         'hotelAddress': hotelDetails['hotelAddress'], 
                         'description': hotelDetails['description'],
                         'amenities': hotelDetails['amenities']}
             hotels.append(data)
 
-            iter += 1
+            iter -= 1
 
             # print(data)
 
-        print(hotels)
+
 
         return JsonResponse({
             'hotelData': hotels,
@@ -115,17 +121,19 @@ def getHotelOnName(request):
 def getHotelReviews(request):
     try:
         requestBody = util.decodeJson(request.body)
+        print(requestBody)
 
         hotelId = requestBody['hotelId']
 
         reviewResult = util.executesql(
             query="SELECT * FROM reviews_table WHERE hotelId = %s",
             datatuple=[hotelId])
+        print(reviewResult)
 
         return JsonResponse({
             'reviews': reviewResult,
             'status': True,
-            'responseMessage': ServerEnum.ServerEnum.RESPONSE_SUCCESS
+            'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
 
     except Exception as e:
