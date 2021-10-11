@@ -31,12 +31,8 @@ def getHotelDashboard(request):
         hotelDatabaseResult = util.executesql(
             query="SELECT * FROM hotels_table",
             datatuple=[])
-
-
-        
-
+            
         hotels = []
-<<<<<<< HEAD
         iter = 5
 
         for hotel in hotelDatabaseResult:
@@ -44,19 +40,6 @@ def getHotelDashboard(request):
             #     break
             # print(hotel[3])
             hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
-=======
-        requestBody = util.decodeJson(request.body)
-
-        iter = requestBody['page']+20
-
-        for hotel in hotelDatabaseResult:
-            if iter == 0:
-                break
-        
-            hotelDetails = None
-            hotelDetails = util.getObjectFromBinaryDecode(hotel[3])
-            # print(hotelDetails)
->>>>>>> 3b47dd221632eac395b12a5b949089f11c1735b3
             data = {"id": hotel[0], "name": hotel[1], "isRecommended": hotel[2], 
                         'hotelAddress': hotelDetails['hotelAddress'], 
                         'description': hotelDetails['description'],
