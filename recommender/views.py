@@ -179,6 +179,35 @@ def setHotelReview(request):
         return util.sendDatabaseConnectionErrorResponse()
 
 
+@csrf_exempt
+def singleHotelDetails(request):
+    try:
+
+        requestBody = util.decodeJson(request.body)
+
+        hotelId = requestBody['hotelId']
+
+        hotelData = util.executesql(query="SELECT * FROM hotels_table WHERE hotelId = %s",
+                                            datatuple=[hotelId[0]])[0][0]
+
+        hotelDetails = util.getObjectFromBinaryDecode(hotelData[3])
+        data = {"id": hotelData[0], "name": hotelData[1], "isRecommended": hotelData[2], 
+                        'hotelAddress': hotelDetails['hotelAddress'], 
+                        'description': hotelDetails['description'],
+                        'amenities': hotelDetails['amenities']}
+
+        return JsonResponse({
+            'hotelData' : data,
+            'status': True,
+            'responseMessage': ServerEnum.ServerEnum.RESPONSE_SUCCESS
+        })
+
+    except Exception as e:
+        print("ERROR IN setHotelReview() method in recommender/views.py")
+        print(e)
+        return util.sendDatabaseConnectionErrorResponse()
+
+
 def getReviewSentiment(review):
     loaded_model = pickle.load(open('finalized_model.sav', 'rb'))
 
