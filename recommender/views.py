@@ -185,6 +185,7 @@ def setHotelReview(request):
                             datatuple=[reviewId, hotelId, reviewBody, recommend, name])
 
         return JsonResponse({
+            'name': name,
             'status': True,
             'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
