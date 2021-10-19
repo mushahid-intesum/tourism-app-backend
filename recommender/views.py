@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from threading import Thread
 import requests
@@ -21,6 +22,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from gensim.test.utils import common_texts
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
 
 
 @csrf_exempt
@@ -118,7 +120,6 @@ def getHotelOnName(request):
 def getHotelReviews(request):
     try:
         requestBody = util.decodeJson(request.body)
-        print(requestBody)
 
         hotelId = requestBody['hotelId']
 
@@ -142,24 +143,31 @@ def getHotelReviews(request):
 @csrf_exempt
 def setHotelReview(request):
     try:
-
-        nltk.download('stopwords')
-        nltk.download('vader_lexicon')
+        # nltk.download('stopwords')
+        # nltk.download('vader_lexicon')
         # put into reviews_table, put sentiment, update hotel's recommendation status
         requestBody = util.decodeJson(request.body)
 
         hotelId = requestBody['hotelId']
         reviewBody = requestBody['reviewBody']
+        email = requestBody['email']
+
+        name = util.executesql(query="SELECT firstName, secondName from customer_user_table where userEmail = %s",
+                                datatuple=[email])
+
+        name = name[0][0] + ' ' + name[0][1]
 
         reviewId = util.generateID("REVIEW")
 
         sentiment = getReviewSentiment(reviewBody)
 
         total_neg_reviews = util.executesql(query="SELECT SUM(sentiment) FROM reviews_table WHERE hotelId = %s",
-                                            datatuple=[hotelId[0]])[0][0]
+                                            datatuple=[hotelId])[0][0]
 
         all_reviews = util.executesql(query="SELECT COUNT(reviewId) FROM reviews_table WHERE hotelId = %s",
-                                       datatuple=[hotelId[0]])[0][0]
+                                       datatuple=[hotelId])[0][0]
+
+        # print(total_neg_reviews, all_reviews)
 
         percentage = total_neg_reviews / all_reviews
 
@@ -170,11 +178,15 @@ def setHotelReview(request):
             recommend = 0
 
         util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",
-                            datatuple=[recommend, hotelId[0]])
+                            datatuple=[recommend, hotelId])
+
+        util.executesql(query="INSERT INTO reviews_table (reviewId, hotelId, reviewBody, sentiment, reviewerName) VALUES \
+                                (%s, %s, %s, %s, %s)",
+                            datatuple=[reviewId, hotelId, reviewBody, recommend, name])
 
         return JsonResponse({
             'status': True,
-            'responseMessage': ServerEnum.ServerEnum.RESPONSE_SUCCESS
+            'responseMessage': ServerEnum.RESPONSE_SUCCESS
         })
 
     except Exception as e:
@@ -214,12 +226,18 @@ def singleHotelDetails(request):
 
 def getReviewSentiment(review):
     loaded_model = pickle.load(open('finalized_model.sav', 'rb'))
+    model = pickle.load(open('doc2vec.sav', 'rb'))
+    features = pickle.load(open("feature.sav", 'rb'))
 
-    reviews_df = pd.DataFrame()
-    reviews_df['review'] = review
+    # tmp_df = pd.DataFrame(data=np.zeros((1,len(features))), columns=features)
 
-    reviews_df["review_clean"] = reviews_df["review"].apply(
-        lambda x: clean_text(x))
+    tree_features = 3837
+    
+    data = {'review': [review], 'review_clean': [clean_text(review)]}
+
+    reviews_df = pd.DataFrame(data=data)
+    # reviews_df['review'] = review
+    # reviews_df['review_clean'] = clean_text(review)
 
     sid = SentimentIntensityAnalyzer()
     reviews_df["sentiments"] = reviews_df["review"].apply(
@@ -227,31 +245,42 @@ def getReviewSentiment(review):
     reviews_df = pd.concat([reviews_df.drop(
         ['sentiments'], axis=1), reviews_df['sentiments'].apply(pd.Series)], axis=1)
 
-    reviews_df["nb_chars"] = reviews_df["review"].apply(lambda x: len(x))
-    reviews_df["nb_words"] = reviews_df["review"].apply(
-        lambda x: len(x.split(" ")))
+    reviews_df["nb_chars"] = float(reviews_df["review"].apply(lambda x: len(x)))
+    reviews_df["nb_words"] = float(reviews_df["review"].apply(
+        lambda x: len(x.split(" "))))
 
     documents = [TaggedDocument(doc, [i]) for i, doc in enumerate(
         reviews_df["review_clean"].apply(lambda x: x.split(" ")))]
-    model = Doc2Vec(documents, vector_size=5, window=2, min_count=1, workers=4)
 
+    # model = Doc2Vec(documents, vector_size=5, window=2, min_count=5, workers=4)
+    
     doc2vec_df = reviews_df["review_clean"].apply(
         lambda x: model.infer_vector(x.split(" "))).apply(pd.Series)
+
     doc2vec_df.columns = ["doc2vec_vector_" +
                           str(x) for x in doc2vec_df.columns]
     reviews_df = pd.concat([reviews_df, doc2vec_df], axis=1)
 
-    tfidf = TfidfVectorizer(min_df=10)
+    tfidf = TfidfVectorizer(min_df=1)
     tfidf_result = tfidf.fit_transform(reviews_df["review_clean"]).toarray()
     tfidf_df = pd.DataFrame(tfidf_result, columns=tfidf.get_feature_names())
     tfidf_df.columns = ["word_" + str(x) for x in tfidf_df.columns]
     tfidf_df.index = reviews_df.index
     reviews_df = pd.concat([reviews_df, tfidf_df], axis=1)
 
+    col_num = len(reviews_df.columns)
+
+    if col_num < tree_features:
+        ones = np.ones((1, tree_features - col_num+2), dtype='float')
+        dummy_cols = ["dummy_"+str(i) for i in range(tree_features - col_num+2)]
+        ones = pd.DataFrame(data=ones, columns=dummy_cols)
+
+        reviews_df = pd.concat([reviews_df, ones], axis=1)
+
     ignore_cols = ["review", "review_clean"]
     features = [c for c in reviews_df.columns if c not in ignore_cols]
 
-    return loaded_model.predict(reviews_df[features])
+    return loaded_model.predict(reviews_df[features].values)
 
 
 def clean_text(text):

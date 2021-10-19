@@ -147,6 +147,7 @@ def create_reviews_table():
                    "hotelId VARCHAR(250)," \
                    "reviewBody VARCHAR(250)," \
                    "sentiment BIGINT NOT NULL," \
+                    "reviewerName VARCHAR(250),"\
                    "PRIMARY KEY (reviewId)) " 
 
         cursor = util.getdbconection()

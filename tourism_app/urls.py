@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^database_commit/', database_views.database_commit, name="database_commit"),
 
     url(r'^hotel_dashboard/', recommender_views.getHotelDashboard, name='hotel_dashboard'),
-    url(r'^hotel_search_country/', recommender_views.getHotelOnCountry, name='hotel_search_country'),
+    # url(r'^hotel_search_country/', recommender_views.getHotelOnCountry, name='hotel_search_country'),
     url(r'^set_hotel_review/', recommender_views.setHotelReview, name='set_hotel_review'),
     url(r'^get_specific_hotel_reviews/', recommender_views.getHotelReviews, name='get_specific_hotel_reviews'),
     url(r'^set_hotel_recommendations/', recommender_views.setHotelRecommends, name='set_hotel_recommendations'),

@@ -15,6 +15,7 @@ from django.contrib.auth.hashers import make_password
 
 @csrf_exempt
 def customerSignin(request):
+    print(request.body)
     try:
         requestBody = util.decodeJson(request.body)
         email = requestBody['email']
@@ -28,6 +29,7 @@ def customerSignin(request):
             return sendCustomerData(adminDetailsUserDatabaseResult)
         else:
             return JsonResponse({
+                'email': email,
                 'status': False,
                 'responseMessage': ServerEnum.RESPONSE_PASSWORD_MISMATCH
             })
@@ -50,6 +52,8 @@ def customerSignup(request):
         secondName = requestBody['lastName']
 
         userId = util.generateID("CUSTOMER")
+
+        
 
         util.executesql(
             query = "INSERT INTO customer_user_table" \

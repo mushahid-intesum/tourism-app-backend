@@ -59,12 +59,12 @@ def adminAddHotel(request):
         hotelId = util.generateID("HOTEL")
 
         adminDetailsUserDatabaseResult = util.executesql(
-            query="INSERT INTO hotels_table (hotelId, hotelName, hotelDetails) value(%s, %s, %s)",
+            query="INSERT INTO hotels_table (hotelId, hotelName, hotelDetails) VALUES +(%s, %s, %s)",
             datatuple=[hotelId, hotelName, hotelDetails])
 
         return JsonResponse({
-                'status': False,
-                'responseMessage': ServerEnum.RESPONSE_PASSWORD_MISMATCH
+                'status': True,
+                'responseMessage': ServerEnum.RESPONSE_SUCCESS
             })
 
     except Exception as e:
