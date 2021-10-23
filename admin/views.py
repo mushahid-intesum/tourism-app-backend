@@ -27,7 +27,7 @@ def adminSignin(request):
         password = requestBody['password']
 
         adminDetailsUserDatabaseResult = util.executesql(
-            query="SELECT * FROM admin_user_table WHERE userEmail = %s AND password = %s",
+            query="SELECT * FROM admin_user_table WHERE userEmail = %s AND userPassword = %s",
             datatuple=[email, password])
 
         if (adminDetailsUserDatabaseResult):

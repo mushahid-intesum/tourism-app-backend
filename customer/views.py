@@ -57,12 +57,12 @@ def customerSignup(request):
             query = "INSERT INTO customer_user_table" \
                 "(userId, userEmail, userPassword, firstName, secondName, createdTime)" \
                 "VALUES (%s, %s, %s, %s, %s, %s)",
-            datatuple=[userId, email, make_password(password), firstName, secondName, util.utcTimeStamp()] 
+            datatuple=[userId, email, password, firstName, secondName, util.utcTimeStamp()] 
         )
 
         customerDetailsUserDatabaseResult = util.executesql(
-            query="SELECT * FROM customer_user_table WHERE userEmail = %s",
-            datatuple=[email])
+            query="SELECT * FROM customer_user_table WHERE userEmail = %s AND userPassword = %s",
+            datatuple=[email, password])
    
         if (customerDetailsUserDatabaseResult):
             return sendCustomerData(customerDetailsUserDatabaseResult)
