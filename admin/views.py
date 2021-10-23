@@ -20,11 +20,9 @@ from user import views as user_views
 
 @csrf_exempt
 def adminSignin(request):
-    print(request.headers)
     try:
         requestBody = util.decodeJson(request.body)
 
-        print(requestBody)
         email = requestBody['email']
         password = requestBody['password']
 
@@ -48,10 +46,8 @@ def adminSignin(request):
 
 @csrf_exempt
 def adminAddHotel(request):
-    print(request.headers)
     try:
         requestBody = util.decodeJson(request.body)
-        print(requestBody)
 
         hotelName = requestBody['hotelName']
         hotelDetails = requestBody['hotelDetails']

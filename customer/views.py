@@ -15,7 +15,6 @@ from django.contrib.auth.hashers import make_password
 
 @csrf_exempt
 def customerSignin(request):
-    print(request.body)
     try:
         requestBody = util.decodeJson(request.body)
         email = requestBody['email']
@@ -44,7 +43,6 @@ def customerSignup(request):
  
 
     try:
-        print(request.body)
         requestBody = util.decodeJson(request.body)
         email = requestBody['userEmail']
         password = requestBody['passWord']

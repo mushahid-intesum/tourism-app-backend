@@ -126,7 +126,6 @@ def getHotelReviews(request):
         reviewResult = util.executesql(
             query="SELECT * FROM reviews_table WHERE hotelId = %s",
             datatuple=[hotelId])
-        print(reviewResult)
 
         return JsonResponse({
             'reviews': reviewResult,
@@ -174,7 +173,6 @@ def setHotelReview(request):
         recommend = 1
 
         if percentage > 0.6:
-            print("negative")
             recommend = 0
 
         util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",
@@ -343,7 +341,6 @@ def setHotelRecommends(request):
             recommend = 1
 
             if percentage > 0.6:
-                print("negative")
                 recommend = 0
 
             util.executesql(query="UPDATE hotels_table SET isRecommended = %s WHERE hotelId = %s",

@@ -191,7 +191,6 @@ def getAllTableName():
 def drop_table(tableList):
     try:
         for tableName in tableList:
-            print(tableName)
             util.executesql(query="DROP TABLE " + tableName, datatuple=[])
 
         return JsonResponse({
